@@ -1,0 +1,11 @@
+{
+    "name": "SendSms",
+    "alias": "sendsms",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\SendSms\\Providers\\SendSmsServiceProvider"
+    ],
+    "files": []
+}

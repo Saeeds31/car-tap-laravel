@@ -1,0 +1,11 @@
+{
+    "name": "StartProject",
+    "alias": "startproject",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\StartProject\\Providers\\StartProjectServiceProvider"
+    ],
+    "files": []
+}

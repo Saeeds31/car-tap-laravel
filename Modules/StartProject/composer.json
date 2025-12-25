@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/startproject",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\StartProject\\": "app/",
+            "Modules\\StartProject\\Database\\Factories\\": "database/factories/",
+            "Modules\\StartProject\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\StartProject\\Tests\\": "tests/"
+        }
+    }
+}

@@ -1,0 +1,11 @@
+{
+    "name": "CarRequest",
+    "alias": "carrequest",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\CarRequest\\Providers\\CarRequestServiceProvider"
+    ],
+    "files": []
+}

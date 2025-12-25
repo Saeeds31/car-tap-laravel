@@ -1,0 +1,11 @@
+{
+    "name": "Receipt",
+    "alias": "receipt",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Receipt\\Providers\\ReceiptServiceProvider"
+    ],
+    "files": []
+}
