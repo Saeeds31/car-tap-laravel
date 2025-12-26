@@ -153,24 +153,28 @@ class BrandController extends Controller
             'message' => 'برند با موفقیت حذف شد',
         ]);
     }
+
     public static function homeBrand()
     {
         return Brand::with(['cars' => function ($query) {
-            $query->select('id', 'name', 'price', 'image', 'brand_id'); // فیلدهای مورد نیاز از ماشین
+            $query->select('id', 'name', 'price', 'image', 'brand_id')
+                ->limit(10); // فقط 10 ماشین
         }])
             ->whereHas('cars') // فقط برندهایی که حداقل یک ماشین دارند
-            ->select('id') // name رو به title تغییر نام می‌دیم
+            ->select('id', 'title', 'description', 'image') // فیلدهای برند
             ->get()
             ->map(function ($brand) {
                 return [
                     'id' => $brand->id,
                     'title' => $brand->title,
+                    'description' => $brand->description,
+                    'image' => $brand->image,
                     'cars' => $brand->cars->map(function ($car) {
                         return [
                             'id' => $car->id,
                             'name' => $car->name,
                             'price' => $car->price,
-                            'image' => $car->image, // یا url دلخواه
+                            'image' => $car->image,
                         ];
                     })->values()->all(),
                 ];
