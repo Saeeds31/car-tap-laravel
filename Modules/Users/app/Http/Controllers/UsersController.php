@@ -72,7 +72,7 @@ class UsersController extends Controller
     }
     public function managerIndex()
     {
-        $users = User::with(['roles', 'addresses', 'wallet'])
+        $users = User::with(['roles', 'wallet'])
             ->whereHas('roles', function ($query) {
                 $query->whereNotIn('slug', ['customer', 'super admin']);
             })
@@ -101,7 +101,7 @@ class UsersController extends Controller
             "notification_users",
             ['users' => null]
         );
-        return response()->json($user->load(['roles', 'addresses', 'wallet']), 201);
+        return response()->json($user->load(['roles', 'wallet']), 201);
     }
 
     // نمایش یک کاربر
@@ -123,7 +123,7 @@ class UsersController extends Controller
             unset($data['password']);
         }
         $user->update($data);
-        return response()->json($user->load(['roles', 'addresses', 'wallet']));
+        return response()->json($user->load(['roles', 'wallet']));
     }
 
     // حذف کاربر
