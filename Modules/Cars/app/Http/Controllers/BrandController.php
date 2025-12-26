@@ -154,14 +154,14 @@ class BrandController extends Controller
         ]);
     }
 
-    public static function homeBrand()
+    public function homeBrand()
     {
-        return Brand::with(['cars' => function ($query) {
+        $brands = Brand::with(['cars' => function ($query) {
             $query->select('id', 'name', 'price', 'image', 'brand_id')
-                ->limit(10); // فقط 10 ماشین
+                ->limit(10);
         }])
-            ->whereHas('cars') // فقط برندهایی که حداقل یک ماشین دارند
-            ->select('id', 'title', 'description', 'image') // فیلدهای برند
+            ->whereHas('cars')
+            ->select('id', 'title', 'description', 'image')
             ->get()
             ->map(function ($brand) {
                 return [
@@ -179,5 +179,10 @@ class BrandController extends Controller
                     })->values()->all(),
                 ];
             })->values()->all();
+
+        return response()->json([
+            'data' => $brands,
+            'success' => true
+        ]);
     }
 }
