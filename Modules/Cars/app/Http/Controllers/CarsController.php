@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Modules\CarRequest\Models\CarRequest;
 use Modules\Cars\Models\Car;
 use Modules\Notifications\Services\NotificationService;
 use Modules\Cars\Http\Requests\CarsStoreRequest;
@@ -277,8 +278,16 @@ class CarsController extends Controller
 
 
     // حذف ماشین
-    public function destroy(Car $car, NotificationService $notifications)
+    public function destroy($id, NotificationService $notifications)
     {
+        $car = Car::findOrFail($id);
+        $ex = CarRequest::where('car_id', $car->id)->exists();
+        if ($ex) {
+            return response()->json([
+                'success' => false,
+                'message' => 'برای این ماشین درخواستی ثبت شده و قابل حذف نیست'
+            ], 403);
+        }
         DB::beginTransaction();
 
         try {
@@ -370,8 +379,9 @@ class CarsController extends Controller
             'data'    => $cars,
         ]);
     }
-    public function frontDetail(Car $car)
+    public function frontDetail($id)
     {
+        $car = Car::findOrFail($id);
         // 1. eager load کامل
         $car->load([
             'category:id,title,slug',
@@ -418,6 +428,7 @@ class CarsController extends Controller
                     'slug' => $car->slug,
                     'brand' => $car->brand,
                     'category' => $car->category,
+                    'description' => $car->description,
                     'images' => $car->images,
                 ],
                 'specifications' => $specificationTable,

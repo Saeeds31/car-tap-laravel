@@ -5,21 +5,48 @@ namespace Modules\SalesPlan\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Modules\CarRequest\Models\CarRequest;
 use Modules\Notifications\Services\NotificationService;
 use Modules\SalesPlan\Models\SalePlan;
 
 class SalesPlanController extends Controller
 {
-
+    public function salesPlanDetail($id)
+    {
+        $salePlan = SalePlan::with('cars')->findOrFail($id);
+        $now = now();
+        if ($salePlan->start_date > $now) {
+            return response()->json([
+                'message' => 'زمان پیش ثبت نام این طرح شروع  نشده است',
+                'salePlan' => $salePlan
+            ]);
+        }
+        if ($salePlan->end_date < $now) {
+            return response()->json([
+                'message' => 'زمان پیش ثبت نام این طرح تمام شده است',
+                'salePlan' => $salePlan
+            ]);
+        }
+        return response()->json([
+            'message' => 'جزئیات طرح',
+            'salePlan' => $salePlan
+        ]);
+    }
+    public function checkCarInSale($carId)
+    {
+        $salePlan = SalePlan::whereHas('cars', function ($query) use ($carId) {
+            $query->where('cars.id', $carId);
+        })->first();
+        return response()->json([
+            'message' => 'طرح مورد نظر خودرو',
+            'salePlan' => $salePlan
+        ]);
+    }
     public function index(Request $request)
     {
         $cars = SalePlan::latest()->paginate(15);
         return response()->json($cars);
     }
-
-    // ذخیره ماشین
-
-
     public function store(Request $request, NotificationService $notifications)
     {
         DB::beginTransaction();
@@ -60,8 +87,6 @@ class SalesPlanController extends Controller
             ], 500);
         }
     }
-
-    // نمایش یک ماشین
     public function show($id)
     {
         $saleplan = SalePlan::findOrFail($id);
@@ -73,13 +98,18 @@ class SalesPlanController extends Controller
             'data' => $saleplan,
         ]);
     }
-
-
     public function update(Request $request, $id, NotificationService $notifications)
     {
         $saleplan = SalePlan::findOrFail($id);
         DB::beginTransaction();
         // اگر تاریخ رد شده باشه و کسی توش ثبت نام کرده باشه نباید ویرایش بشه
+        $ex = CarRequest::where('car_id', $car->id)->exists();
+        if ($ex) {
+            return response()->json([
+                'success' => false,
+                'message' => 'برای این ماشین درخواستی ثبت شده و قابل حذف نیست'
+            ], 403);
+        }
         try {
             $data = $request->validate(
                 [
@@ -125,8 +155,16 @@ class SalesPlanController extends Controller
 
     public function destroy($id, NotificationService $notifications)
     {
+
         DB::beginTransaction();
         $saleplan = SalePlan::with(['cars'])->findOrFail($id);
+        $ex = CarRequest::where('sale_plan_id', $saleplan->id)->exists();
+        if ($ex) {
+            return response()->json([
+                'success' => false,
+                'message' => 'برای این طرح درخواستی ثبت شده و قابل حذف نیست'
+            ], 403);
+        }
         try {
             $saleplan->cars()->detach();
             $notifications->create(

@@ -11,6 +11,7 @@ Route::middleware(['auth:sanctum'])->prefix('v1/admin')->group(function () {
     Route::apiResource('brands', BrandController::class)->names('brands');
 });
 
-Route::middleware(['auth:sanctum'])->prefix('v1/front')->group(function () {
-    Route::get('home-brand',[ BrandController::class,'homeBrand'])->name('homeBrand');
+Route::prefix('v1/front')->group(function () {
+    Route::get('home-brand', [BrandController::class, 'homeBrand'])->name('homeBrand');
+    Route::get('/cars/{id}', [CarsController::class, 'frontDetail'])->name('carDetail');
 });
