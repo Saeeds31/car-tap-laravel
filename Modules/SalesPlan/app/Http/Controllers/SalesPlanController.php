@@ -11,6 +11,7 @@ use Modules\SalesPlan\Models\SalePlan;
 
 class SalesPlanController extends Controller
 {
+
     public function salesPlanDetail($id)
     {
         $salePlan = SalePlan::with('cars')->findOrFail($id);
@@ -24,7 +25,7 @@ class SalesPlanController extends Controller
         if ($salePlan->end_date < $now) {
             return response()->json([
                 'message' => 'زمان پیش ثبت نام این طرح تمام شده است',
-                'salePlan' => $salePlan
+                'salePlan' =>null
             ]);
         }
         return response()->json([
@@ -34,14 +35,20 @@ class SalesPlanController extends Controller
     }
     public function checkCarInSale($carId)
     {
+        $now = now();
         $salePlan = SalePlan::whereHas('cars', function ($query) use ($carId) {
             $query->where('cars.id', $carId);
-        })->first();
+        })
+            ->where('start_date', '<=', $now)   // طرح شروع شده باشد
+            ->where('end_date', '>=', $now)     // طرح هنوز تمام نشده باشد
+            ->first();
+
         return response()->json([
-            'message' => 'طرح مورد نظر خودرو',
+            'message' => $salePlan ? 'طرح معتبر برای خودرو یافت شد' : 'هیچ طرح فعالی برای این خودرو وجود ندارد',
             'salePlan' => $salePlan
         ]);
     }
+
     public function index(Request $request)
     {
         $cars = SalePlan::latest()->paginate(15);

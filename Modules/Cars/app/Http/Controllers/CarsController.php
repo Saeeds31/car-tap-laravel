@@ -384,7 +384,7 @@ class CarsController extends Controller
         $car = Car::findOrFail($id);
         // 1. eager load کامل
         $car->load([
-            'category:id,title,slug',
+            'category:id,title',
             'brand:id,title',
             'images:id,car_id,path',
             'specifications:id,title,group_id',
@@ -422,15 +422,7 @@ class CarsController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'car' => [
-                    'id' => $car->id,
-                    'title' => $car->title,
-                    'slug' => $car->slug,
-                    'brand' => $car->brand,
-                    'category' => $car->category,
-                    'description' => $car->description,
-                    'images' => $car->images,
-                ],
+                'car' => $car,
                 'specifications' => $specificationTable,
             ],
         ]);

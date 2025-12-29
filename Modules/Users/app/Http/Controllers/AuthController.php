@@ -196,4 +196,34 @@ class AuthController extends Controller
             "success" => true
         ]);
     }
+    public function update(Request $request)
+    {
+        $user = $request->user();
+
+        $validated_data = $request->validate([
+            'national_code' => ['nullable', 'string', 'size:10'],
+            'birth_date'    => ['nullable', 'date'],
+            'full_name' => 'required|string|min:3',
+            'birth_certificate_number' => 'required|string',
+            'marital_status' => 'required',
+            'image' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
+            'address' => 'required|string',
+            'city_id' => 'required|integer|exists:cities,id',
+            'postal_code' => 'required|string',
+        ]);
+
+        // اگر فایل تصویر آپلود شده بود
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('users/images', 'public');
+            $validated_data['image'] = $path;
+        }
+
+        // بروزرسانی اطلاعات کاربر
+        $user->update($validated_data);
+
+        return response()->json([
+            'message' => 'اطلاعات کاربر با موفقیت بروزرسانی شد',
+            'user'    => $user,
+        ]);
+    }
 }

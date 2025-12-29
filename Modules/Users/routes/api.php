@@ -26,6 +26,7 @@ Route::post('v1/admin/login-verify', [AuthController::class, 'adminLogin'])->nam
 Route::post('v1/admin/send-token', [AuthController::class, 'adminSendToken'])->name("adminSendToken");
 
 Route::middleware(['auth:sanctum'])->prefix('v1/front')->group(function () {
+    Route::post('/user/profile/edit', [AuthController::class, 'update'])->name("update-user-auth");
     Route::get('/user/profile', [UsersController::class, 'userProfile'])->name("userProfile");
     Route::get('/user/validity', [UsersController::class, 'userValidity'])->name("userValidity");
     Route::get('/supervisor-role', [RolesController::class, 'supervisorRole'])->name("supervisorRole");

@@ -4,8 +4,71 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bcf3c7179041652a3a800e9c427858c5",
+    "content-hash": "c2755440417cb13a886f6e636a2e50b0",
     "packages": [
+        {
+            "name": "alrez/iran-states",
+            "version": "v2.3.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/allllrez/iranStates.git",
+                "reference": "8165e52054fe515c860d465455c67ca3f819288b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/allllrez/iranStates/zipball/8165e52054fe515c860d465455c67ca3f819288b",
+                "reference": "8165e52054fe515c860d465455c67ca3f819288b",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/framework": "^11.0|^12.0",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^8.5|^9.0",
+                "phpunit/phpunit": "^10.5|^11.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Alrez\\IranStates\\IranStatesServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Alrez\\IranStates\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "alrez",
+                    "email": "anabestanireza@yahoo.com"
+                }
+            ],
+            "description": "A package for managing provinces and cities of Iran in Laravel.",
+            "keywords": [
+                "iran",
+                "iran-cities",
+                "iran-package",
+                "iran-provinces",
+                "iran-states",
+                "laravel",
+                "laravel-12",
+                "php",
+                "php-8.2"
+            ],
+            "support": {
+                "issues": "https://github.com/allllrez/iranStates/issues",
+                "source": "https://github.com/allllrez/iranStates/tree/v2.3.2"
+            },
+            "time": "2025-08-06T06:34:12+00:00"
+        },
         {
             "name": "brick/math",
             "version": "0.14.0",
