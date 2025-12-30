@@ -25,7 +25,7 @@ class SalesPlanController extends Controller
         if ($salePlan->end_date < $now) {
             return response()->json([
                 'message' => 'زمان پیش ثبت نام این طرح تمام شده است',
-                'salePlan' =>null
+                'salePlan' => null
             ]);
         }
         return response()->json([
@@ -108,9 +108,11 @@ class SalesPlanController extends Controller
     public function update(Request $request, $id, NotificationService $notifications)
     {
         $saleplan = SalePlan::findOrFail($id);
+        $carIds = $request->input('car_id', []);
+
         DB::beginTransaction();
         // اگر تاریخ رد شده باشه و کسی توش ثبت نام کرده باشه نباید ویرایش بشه
-        $ex = CarRequest::where('car_id', $car->id)->exists();
+        $ex = CarRequest::whereIn('car_id', $carIds)->exists();
         if ($ex) {
             return response()->json([
                 'success' => false,
@@ -127,7 +129,6 @@ class SalesPlanController extends Controller
             );
             $saleplan->update($data);
             $saleplan->cars()->detach();
-            $carIds = $request->input('car_id', []);
             $min_order_counts = $request->input('min_order_count', []);
             foreach ($carIds as $index => $carId) {
                 $min_order_count = $min_order_counts[$index] ?? null;

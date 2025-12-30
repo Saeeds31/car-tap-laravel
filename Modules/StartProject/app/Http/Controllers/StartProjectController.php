@@ -99,6 +99,7 @@ class StartProjectController extends Controller
             'sendsms_create' => 'ارسال پیامک',
             'report_users' => 'گزارش کاربران',
             'report_sales' => 'گزارش فروش',
+            'report_car' => 'گزارش فروش',
             'comment_blogs' => 'کامنت مقالات',
             'notification_content' => 'اعلان محتوا',
             'notification_car' => 'اعلان ماشین ها',
