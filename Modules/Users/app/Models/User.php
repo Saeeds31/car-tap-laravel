@@ -70,23 +70,9 @@ class User extends Authenticatable
     public static  function dashboardReport()
     {
         $todayUsers = self::whereDate('created_at', today())->pluck('id');
-
-        $registerTable = DB::table('register');
-
-        $stepsData = [];
-
-        foreach ([1, 2, 3, 4] as $step) {
-            $stepsData["step_$step"] = [
-                'pending'  => (clone $registerTable)->whereIn('user_id', $todayUsers)->where('step', $step)->where('status', 'pending')->count(),
-                'accepted' => (clone $registerTable)->whereIn('user_id', $todayUsers)->where('step', $step)->where('status', 'accepted')->count(),
-                'rejected' => (clone $registerTable)->whereIn('user_id', $todayUsers)->where('step', $step)->where('status', 'rejected')->count(),
-            ];
-        }
-
         return [
             'total_users'       => self::count(),
             'today_registered'  => $todayUsers->count(),
-            'steps'             => $stepsData,
         ];
     }
 }
