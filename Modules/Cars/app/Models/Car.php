@@ -46,4 +46,21 @@ class Car extends Model
             ->withPivot('specification_value_id')
             ->withTimestamps();
     }
+    public static function dashboardReport()
+    {
+        return [
+            'total_cars' => self::count(),
+            'cars_by_brand' => self::selectRaw('brand_id, COUNT(*) as total')
+                ->groupBy('brand_id')
+                ->pluck('total', 'brand_id'),
+
+            'cars_by_category' => self::selectRaw('category_id, COUNT(*) as total')
+                ->groupBy('category_id')
+                ->pluck('total', 'category_id'),
+
+            'average_price' => self::avg('price'),
+            'min_price' => self::min('price'),
+            'max_price' => self::max('price'),
+        ];
+    }
 }

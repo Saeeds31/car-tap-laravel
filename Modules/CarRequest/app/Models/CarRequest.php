@@ -29,4 +29,17 @@ class CarRequest extends Model
     {
         return $this->belongsTo(SalePlan::class);
     }
+    public static function dashboardReport()
+    {
+        $now = now();
+        $activeSalePlans = SalePlan::whereDate('start_date', '<=', $now)
+            ->whereDate('end_date', '>=', $now)
+            ->pluck('id');
+
+        return [
+            'total_requests' => self::count(),
+            'requests_in_active_sale_plans' => self::whereIn('sale_plan_id', $activeSalePlans)->count(),
+            'average_price_in_active_sale_plans' => self::whereIn('sale_plan_id', $activeSalePlans)->avg('price'),
+        ];
+    }
 }

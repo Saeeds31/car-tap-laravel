@@ -5,6 +5,8 @@ namespace Modules\Reports\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Modules\CarRequest\Models\CarRequest;
+use Modules\Cars\Models\Car;
 use Modules\CourseOrder\Models\CourseOrder;
 use Modules\CourseOrder\Models\OrderResult;
 use Modules\Orders\Models\Order;
@@ -14,88 +16,105 @@ use Modules\Users\Models\User;
 class ReportsController extends Controller
 {
 
-
-    public static function courseOrderDetailedReport(Request $request)
+    public function usersReport(Request $request)
     {
-        $query = CourseOrder::query()
-            ->with(['user', 'course']);   // هر رابطه‌ای داری اضافه کن
-
-        // فیلترهای مربوط به User
-        $query->whereHas('user', function ($q) use ($request) {
-            if ($mobile = $request->get('mobile')) {
-                $q->where('mobile', 'like', "%{$mobile}%");
-            }
-            if ($national_code = $request->get('national_code')) {
-                $q->where('national_code', 'like', "%{$national_code}%");
-            }
+        $query = User::whereHas('roles', function ($q) {
+            $q->where('slug', 'customer');
         });
 
-        // فیلترهای مخصوص CourseOrder
-        if ($pay_status = $request->get('pay_status')) {
-            $query->where('pay_status', $pay_status);
+        if ($request->filled('full_name')) {
+            $query->where('full_name', 'like', '%' . $request->full_name . '%');
         }
-        if ($status = $request->get('status')) {
-            $query->where('status', $status);
-        }
-        if ($cost_from = $request->get('cost_from')) {
-            $query->where('paid_cost', '>=', $cost_from);
-        }
-        if ($cost_to = $request->get('cost_to')) {
-            $query->where('paid_cost', '<=', $cost_to);
-        }
-        if ($course_id = $request->get('course_id')) {
-            $query->where('course_id', $course_id);
+        if ($request->filled('mobile')) {
+            $query->where('mobile', 'like', '%' . $request->mobile . '%');
         }
 
-        return $query->paginate(20);
+        if ($request->filled('national_code')) {
+            $query->where('national_code', 'like', '%' . $request->national_code . '%');
+        }
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('created_at', [$request->start_date, $request->end_date]);
+        } elseif ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        } elseif ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+        $users = $query->latest()->paginate($request->get('per_page', 15));
+        return response()->json($users);
     }
-    public static function resultExamDetailedReport(Request $request)
+    public function carsReport(Request $request)
     {
-        $query = OrderResult::query()
-            ->with([
-                'courseOrder.user',
-                'courseOrder.course'
-            ]);
+        $query = Car::query()->with(['brand', 'category']);
 
-        // ---------------------------
-        // فیلترهای مربوط به User
-        // ---------------------------
-        $query->whereHas('courseOrder.user', function ($q) use ($request) {
-
-            if ($mobile = $request->get('mobile')) {
-                $q->where('mobile', 'like', "%{$mobile}%");
-            }
-            if ($national_code = $request->get('national_code')) {
-                $q->where('national_code', 'like', "%{$national_code}%");
-            }
-        });
-
-        // ---------------------------
-        // فیلترهای مربوط به CourseOrder
-        // ---------------------------
-        $query->whereHas('courseOrder', function ($q) use ($request) {
-
-            if ($course_id = $request->get('course_id')) {
-                $q->where('course_id', $course_id);
-            }
-        });
-
-        // ---------------------------
-        // فیلترهای مربوط به ResultExam
-        // ---------------------------
-        if ($status = $request->get('status')) { // قبول – رد شده…
-            $query->where('status', $status);
+        // فیلتر بر اساس نام خودرو
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
         }
 
-        if ($score_from = $request->get('score_from')) {
-            $query->whereRaw("CAST(score AS DECIMAL(10,2)) >= ?", [$score_from]);
+        // فیلتر بر اساس برند
+        if ($request->filled('brand_id')) {
+            $query->where('brand_id', $request->brand_id);
         }
-        
-        if ($score_to = $request->get('score_to')) {
-            $query->whereRaw("CAST(score AS DECIMAL(10,2)) <= ?", [$score_to]);
-        }
-        
 
-        return $query->paginate(20);
+        // فیلتر بر اساس دسته‌بندی
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        // فیلتر بر اساس بازه قیمت
+        if ($request->filled('min_price') && $request->filled('max_price')) {
+            $query->whereBetween('price', [$request->min_price, $request->max_price]);
+        } elseif ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        } elseif ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        // فیلتر بر اساس تاریخ ثبت (created_at)
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('created_at', [$request->start_date, $request->end_date]);
+        } elseif ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        } elseif ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+
+        // صفحه‌بندی
+        $cars = $query->latest()->paginate($request->get('per_page', 15));
+
+        // خروجی JSON برای API
+        return response()->json($cars);
+    }
+    public function carRequestReport(Request $request)
+    {
+        $query = CarRequest::query()->with(['user', 'car', 'sale_plan']);
+
+        if ($request->filled('user_name')) {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('full_name', 'like', '%' . $request->user_name . '%');
+            });
+        }
+        if ($request->filled('sale_plan_id')) {
+            $query->where('sale_plan_id', $request->sale_plan_id);
+        }
+
+        if ($request->filled('car_name')) {
+            $query->whereHas('car', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->car_name . '%');
+            });
+        }
+        if ($request->filled('min_price') && $request->filled('max_price')) {
+            $query->whereBetween('price', [$request->min_price, $request->max_price]);
+        } elseif ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        } elseif ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        $requests = $query->latest()->paginate($request->get('per_page', 15));
+        return response()->json($requests);
     }
 }
