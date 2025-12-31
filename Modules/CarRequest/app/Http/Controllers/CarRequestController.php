@@ -94,7 +94,7 @@ class CarRequestController extends Controller
     }
     public function index(Request $request)
     {
-        $query = CarRequest::with(['car', 'user', 'sale_plan'])->query();
+        $query = CarRequest::with(['car', 'user', 'sale_plan']);
         if ($request->filled('user_name')) {
             $query->whereHas('user', function ($q) use ($request) {
                 $q->where('full_name', 'like', '%' . $request->user_name . '%');
@@ -115,6 +115,7 @@ class CarRequestController extends Controller
         $requests = $query->latest()->paginate($request->get('per_page', 15));
         return response()->json($requests);
     }
+
 
     public function changeStatus(Request $request, $id, NotificationService $notifications)
     {
