@@ -79,7 +79,9 @@ class CarRequestController extends Controller
             'price' => $car->price,
             'status' => 'pending'
         ]);
-
+        $smsService = new SmsService();
+        $smsText = "درخواست شما با موفقیت ثبت شد و نتیجه آن به زودی به شما اطلاع رسانی خواهد شد\n تکین آراز پرگاس";
+        $smsService->sendText($user->mobile, $smsText);
         // 5. کاهش موجودی خودرو در طرح
         DB::table('sales_plan_cars')
             ->where('id', $salePlanCar->id)

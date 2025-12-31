@@ -156,7 +156,7 @@ class BrandController extends Controller
 
     public function homeBrand()
     {
-        $brands = Brand::with(['cars' => function ($query) {
+        $brands = Brand::with(['cars.category' => function ($query) {
             $query->select('id', 'name', 'price', 'image', 'brand_id')
                 ->limit(10);
         }])
@@ -175,6 +175,7 @@ class BrandController extends Controller
                             'name' => $car->name,
                             'price' => $car->price,
                             'image' => $car->image,
+                            'category'=>$car->category
                         ];
                     })->values()->all(),
                 ];
