@@ -153,12 +153,14 @@ class BrandController extends Controller
             'message' => 'برند با موفقیت حذف شد',
         ]);
     }
-
     public function homeBrand()
     {
-        $brands = Brand::with(['cars.category' => function ($query) {
-            $query->select('id', 'name', 'price', 'image', 'brand_id')
-                ->limit(10);
+        $brands = Brand::with(['cars' => function ($query) {
+            $query->select('id', 'name', 'price', 'image', 'brand_id', 'category_id')
+                ->limit(10)
+                ->with(['category' => function ($q) {
+                    $q->select('id', 'title');
+                }]);
         }])
             ->whereHas('cars')
             ->select('id', 'title', 'description', 'image')
@@ -175,7 +177,10 @@ class BrandController extends Controller
                             'name' => $car->name,
                             'price' => $car->price,
                             'image' => $car->image,
-                            'category'=>$car->category
+                            'category' => $car->category ? [
+                                'id' => $car->category->id,
+                                'title' => $car->category->title,
+                            ] : null,
                         ];
                     })->values()->all(),
                 ];
